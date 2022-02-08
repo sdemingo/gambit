@@ -2,8 +2,9 @@ package netcon
 
 import (
 	"bufio"
-	"fmt"
+	"encoding/json"
 	"net"
+	"strings"
 
 	dt "github.com/dylhunn/dragontoothmg"
 )
@@ -16,20 +17,36 @@ const (
 var conn net.Conn
 var user string
 
-func ConnectToServer(username string) {
-	conn, _ = net.Dial("tcp", SERVER+":"+PORT)
+func ConnectToServer(username string) (err error) {
+	conn, err = net.Dial("tcp", SERVER+":"+PORT)
 	user = username
+	return err
 }
 
 // Join to a created match or create a new match in the server
 // if match has no text
-func JoinMatch(match string) string {
-	cmd := fmt.Sprintf("/join:%s\n", match)
-	conn.Write([]byte(cmd))
+func JoinMatch(match string) (*Msg, error) {
+	msg := NewMsg(JOIN, user)
+	b, _ := json.Marshal(msg)
+	conn.Write(b)
+
+	resp, err := UnpackMsg(conn)
+	if err != nil {
+		return nil, err
+
+	}
+	return resp, nil
+}
+
+// Create a new match
+func CreateMatch() string {
+	msg := NewMsg(CREATE, user)
+	b, _ := json.Marshal(msg)
+	conn.Write(b)
 
 	resp := bufio.NewReader(conn)
-	respBody, _ := resp.ReadString('\n')
-	return respBody
+	message, _ := resp.ReadString('\n')
+	return strings.Trim(message, "\n")
 }
 
 // Send a move to the server

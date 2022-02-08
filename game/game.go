@@ -27,6 +27,8 @@ const (
 // track of the subset of legal moves for the currently selected piece
 type model struct {
 	match      string
+	userWhite  string
+	userBlack  string
 	board      *dt.Board
 	moves      []dt.Move
 	pieceMoves []dt.Move
@@ -38,12 +40,14 @@ type model struct {
 // InitialModel returns an initial model of the game board. It uses the
 // starting position of a normal chess game and generates the legal moves from
 // the starting position.
-func InitialModel(match string) tea.Model {
+func InitialModel(match string, white string, black string) tea.Model {
 	board := dt.ParseFen(dt.Startpos)
 	return model{
-		match: match,
-		board: &board,
-		moves: board.GenerateLegalMoves(),
+		match:     match,
+		userWhite: white,
+		userBlack: black,
+		board:     &board,
+		moves:     board.GenerateLegalMoves(),
 	}
 }
 
@@ -82,7 +86,9 @@ func (m model) Init() tea.Cmd {
 //
 func (m model) View() string {
 	var s strings.Builder
-	s.WriteString("Partida: " + m.match + "\n\n")
+	s.WriteString("Partida: " + m.match + "\n")
+	s.WriteString("Blancas: " + m.userWhite + "\n")
+	s.WriteString("Negras: " + m.userBlack + "\n\n")
 
 	s.WriteString(BorderTop())
 
