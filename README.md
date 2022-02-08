@@ -1,25 +1,14 @@
 # Gambit
 
-Chess board in your terminal.
+Chess board in your terminal. All this work are inspired and based in the original [gambit](https://github.com/maaslalani/gambit) from [Maas Lalani](https://github.com/maaslalani). 
+
+I'm take it and build [gambitsrv](https://github.com/sdemingo/gambitsrv). A simple server in Go to manage games between human players.
 
 <br/>
 <p align="center">
   <img width="90%" src="./chess.gif?raw=true" alt="Terminal chess" />
 </p>
 <br/>
-
-### Installation
-
-```sh
-go install github.com/maaslalani/gambit@latest
-```
-
-or run from source
-
-```sh
-git clone github.com/maaslalani/gambit
-go run ./...
-```
 
 
 ### Move
@@ -40,11 +29,3 @@ gambit
 You can press <kbd>ctrl+f</kbd> to flip the board to give a better perspective
 for the second player.
 
-### Future
-
-In the future, `gambit` will support:
-
-* networked play, where two players can run
-`gabmit unique-room-id` and play together through peer-to-peer communication.
-
-* Single player games, by adding a chess engine
