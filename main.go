@@ -3,13 +3,19 @@ package main
 import (
 	"log"
 
+	"gambit/game"
+	"gambit/netcon"
+
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/maaslalani/gambit/game"
 )
 
 func main() {
+
+	netcon.ConnectToServer("sdemingo")
+	match := netcon.JoinMatch("")
+
 	p := tea.NewProgram(
-		game.InitialModel(),
+		game.InitialModel(match),
 		tea.WithAltScreen(),
 		tea.WithMouseCellMotion(),
 	)

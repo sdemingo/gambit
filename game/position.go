@@ -1,28 +1,26 @@
-package position
+package game
 
 import (
 	"fmt"
 	"strconv"
-
-	"github.com/maaslalani/gambit/board"
 )
 
 // colToFile returns the file given a column
 func colToFile(col int) string {
-	if col < board.FirstCol {
-		col = board.FirstCol
-	} else if col > board.LastCol {
-		col = board.LastCol
+	if col < FirstCol {
+		col = FirstCol
+	} else if col > LastCol {
+		col = LastCol
 	}
 	return fmt.Sprintf("%c", col+'a')
 }
 
 // rowToRank returns a rank given a row
 func rowToRank(row int) int {
-	if row < board.FirstRow {
-		row = board.FirstRow
-	} else if row > board.LastRow {
-		row = board.LastRow
+	if row < FirstRow {
+		row = FirstRow
+	} else if row > LastRow {
+		row = LastRow
 	}
 	return row + 1
 }

@@ -1,10 +1,7 @@
-package border
+package game
 
 import (
 	"strings"
-
-	"github.com/maaslalani/gambit/board"
-	"github.com/maaslalani/gambit/position"
 )
 
 const (
@@ -38,9 +35,9 @@ func Cell(x, y int, flipped bool) string {
 		//
 		// In other words, flipped is flipped. This trade-off is for consistency
 		// with the other parts of the code base, namely the model.flipped property
-		row = board.LastRow - row
+		row = LastRow - row
 	}
-	return position.ToSquare(row, col)
+	return ToSquare(row, col)
 }
 
 // withMarginLeft returns a string with a prepended left margin
@@ -50,13 +47,13 @@ func withMarginLeft(s string) string {
 
 // Build returns a string with a border for a given row (top, middle, bottom)
 func Build(left, middle, right string) string {
-	border := left + Horizontal + strings.Repeat(Horizontal+Horizontal+middle+Horizontal, board.LastRow)
+	border := left + Horizontal + strings.Repeat(Horizontal+Horizontal+middle+Horizontal, LastRow)
 	border += Horizontal + Horizontal + right + "\n"
 	return withMarginLeft(border)
 }
 
 // Top returns a built border with the top row
-func Top() string {
+func BorderTop() string {
 	return Build("┌", "┬", "┐")
 }
 
@@ -66,7 +63,7 @@ func Middle() string {
 }
 
 // Bottom returns a built border with the bottom row
-func Bottom() string {
+func BorderBottom() string {
 	return Build("└", "┴", "┘")
 }
 

@@ -2,18 +2,23 @@ package game
 
 import (
 	"fmt"
+	"gambit/netcon"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	dt "github.com/dylhunn/dragontoothmg"
+)
 
-	"github.com/maaslalani/gambit/board"
-	"github.com/maaslalani/gambit/border"
-	"github.com/maaslalani/gambit/fen"
-	"github.com/maaslalani/gambit/moves"
-	"github.com/maaslalani/gambit/pieces"
-	"github.com/maaslalani/gambit/position"
-	. "github.com/maaslalani/gambit/style"
+const (
+	Cols = 8
+	Rows = 8
+)
+
+const (
+	FirstCol = 0
+	FirstRow = 0
+	LastCol  = Cols - 1
+	LastRow  = Rows - 1
 )
 
 // model stores the state of the chess game.
@@ -21,6 +26,7 @@ import (
 // It tracks the board, legal moves, and the selected piece. It also keeps
 // track of the subset of legal moves for the currently selected piece
 type model struct {
+	match      string
 	board      *dt.Board
 	moves      []dt.Move
 	pieceMoves []dt.Move
@@ -32,9 +38,10 @@ type model struct {
 // InitialModel returns an initial model of the game board. It uses the
 // starting position of a normal chess game and generates the legal moves from
 // the starting position.
-func InitialModel() tea.Model {
+func InitialModel(match string) tea.Model {
 	board := dt.ParseFen(dt.Startpos)
 	return model{
+		match: match,
 		board: &board,
 		moves: board.GenerateLegalMoves(),
 	}
@@ -75,52 +82,54 @@ func (m model) Init() tea.Cmd {
 //
 func (m model) View() string {
 	var s strings.Builder
-	s.WriteString(border.Top())
+	s.WriteString("Partida: " + m.match + "\n\n")
+
+	s.WriteString(BorderTop())
 
 	// Traverse through the rows and columns of the board and print out the
 	// pieces and empty squares. Once a piece is selected, highlight the legal
 	// moves and pieces that may be captured by the selected piece.
-	var rows = fen.Grid(m.board.ToFen())
+	var rows = Grid(m.board.ToFen())
 
-	for r := board.FirstRow; r < board.Rows; r++ {
+	for r := FirstRow; r < Rows; r++ {
 		row := rows[r]
-		rr := board.LastRow - r
+		rr := LastRow - r
 
 		if m.flipped {
-			row = rows[board.LastRow-r]
+			row = rows[LastRow-r]
 			rr = r
 		}
 
-		s.WriteString(Faint(fmt.Sprintf(" %d ", rr+1)) + border.Vertical)
+		s.WriteString(Faint(fmt.Sprintf(" %d ", rr+1)) + Vertical)
 
 		for c, cell := range row {
-			display := pieces.Display[cell]
+			display := Display[cell]
 
 			// The user selected the current cell, highlight it so they know it is
 			// selected.
-			if m.selected == position.ToSquare(rr, c) {
+			if m.selected == ToSquare(rr, c) {
 				display = Cyan(display)
 			}
 
 			// Show all the cells to which the piece may move. If it is an empty cell
 			// we present a coloured dot, otherwise color the capturable piece.
-			if moves.IsLegal(m.pieceMoves, position.ToSquare(rr, c)) {
+			if IsLegal(m.pieceMoves, ToSquare(rr, c)) {
 				if cell == "" {
 					display = "."
 				}
 				display = Magenta(display)
 			}
 
-			s.WriteString(fmt.Sprintf(" %s %s", display, border.Vertical))
+			s.WriteString(fmt.Sprintf(" %s %s", display, Vertical))
 		}
 		s.WriteRune('\n')
 
-		if r != board.LastRow {
-			s.WriteString(border.Middle())
+		if r != LastRow {
+			s.WriteString(Middle())
 		}
 	}
 
-	s.WriteString(border.Bottom() + Faint(border.BottomLabels()))
+	s.WriteString(BorderBottom() + Faint(BottomLabels()))
 	return s.String()
 }
 
@@ -134,8 +143,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Find the square the user clicked on, this will either be our square
 		// square for our piece or the destination square for a move if a piece is
 		// already square and that destination square completes a legal move
-		square := border.Cell(msg.X, msg.Y, m.flipped)
+		square := Cell(msg.X, msg.Y, m.flipped)
 		return m.Select(square)
+
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
@@ -176,6 +186,9 @@ func (m model) Select(square string) (tea.Model, tea.Cmd) {
 			if move.String() == from+to {
 				m.board.Apply(move)
 
+				// send move to server
+				netcon.SendMove(move)
+
 				// We have applied a new move and the chess board is in a new state.
 				// We must generate the new legal moves for the new state.
 				m.moves = m.board.GenerateLegalMoves()
@@ -195,7 +208,7 @@ func (m model) Select(square string) (tea.Model, tea.Cmd) {
 
 	// After a mouse click, we must generate the legal moves for the selected
 	// piece, if there is a newly selected piece
-	m.pieceMoves = moves.LegalSelected(m.moves, m.selected)
+	m.pieceMoves = LegalSelected(m.moves, m.selected)
 
 	return m, nil
 }

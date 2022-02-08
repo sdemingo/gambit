@@ -1,18 +1,16 @@
-package square
+package game
 
 import (
 	"strconv"
-
-	"github.com/maaslalani/gambit/board"
 )
 
 // fileToCol returns column number (e.g. 0) for a given file (e.g. 'a').
 func fileToCol(file rune) int {
 	col := int(file - 'a')
-	if col < board.FirstCol {
-		col = board.FirstCol
-	} else if col > board.LastCol {
-		col = board.LastCol
+	if col < FirstCol {
+		col = FirstCol
+	} else if col > LastCol {
+		col = LastCol
 	}
 	return col
 }
@@ -20,10 +18,10 @@ func fileToCol(file rune) int {
 // rankToRow returns a row number (e.g. 0) for a given rank (e.g. 1).
 func rankToRow(rank int) int {
 	row := rank - 1
-	if row < board.FirstRow {
-		row = board.FirstRow
-	} else if row > board.LastRow {
-		row = board.LastRow
+	if row < FirstRow {
+		row = FirstRow
+	} else if row > LastRow {
+		row = LastRow
 	}
 	return row
 }
