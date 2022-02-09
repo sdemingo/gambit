@@ -25,17 +25,15 @@ func ConnectToServer(username string) (err error) {
 
 // Join to a created match or create a new match in the server
 // if match has no text
-func JoinMatch(match string) (*Msg, error) {
+func JoinMatch(match string) string {
 	msg := NewMsg(JOIN, user)
+	msg.Args = match
 	b, _ := json.Marshal(msg)
 	conn.Write(b)
 
-	resp, err := UnpackMsg(conn)
-	if err != nil {
-		return nil, err
-
-	}
-	return resp, nil
+	resp := bufio.NewReader(conn)
+	message, _ := resp.ReadString('\n')
+	return strings.Trim(message, "\n")
 }
 
 // Create a new match
@@ -52,6 +50,12 @@ func CreateMatch() string {
 // Send a move to the server
 func SendMove(move dt.Move) {
 	conn.Write([]byte(move.String() + "\n"))
+}
+
+func ReceivePlayerName() string {
+	resp := bufio.NewReader(conn)
+	message, _ := resp.ReadString('\n')
+	return strings.Trim(message, "\n")
 }
 
 /*
