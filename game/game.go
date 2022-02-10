@@ -68,12 +68,16 @@ func listenForMove(c chan string) tea.Cmd {
 	return func() tea.Msg {
 		for {
 			moveMsg, _ := netcon.ReciveMsg()
-			if moveMsg != nil {
+			if moveMsg != nil && moveMsg.Cmd == netcon.MOVE {
 				fields := strings.Split(moveMsg.Args, ":")
 				if len(fields) == 2 {
 					log.Printf("Recibido movimiento: %s\n", fields[1])
 					c <- fields[1]
 				}
+			}
+
+			if moveMsg != nil && moveMsg.Cmd == netcon.END{
+				c <- "FINAL:"+moveMsg.Args //recibido final de partida
 			}
 		}
 	}
@@ -211,8 +215,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case moveReceived:
+		movestr:=fmt.Sprintf("%s",msg)
+		if strings.HasPrefix("FINAL:",movestr){
+			return m, tea.Quit
+		}
 		if m.wait {
-			move, err := dt.ParseMove(fmt.Sprintf("%s", msg))
+			move, err := dt.ParseMove(movestr)
 			if err == nil {
 				m.board.Apply(move)
 				log.Println("Movimiento aplicado")
