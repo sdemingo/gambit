@@ -20,10 +20,15 @@ There are two ways to move in `gambit`:
 
 ### Play
 
-You can play a game by running:
+You can create a new a game by running:
 
 ```
-gambit
+gambit 
+```
+
+Then, you get the game id from the server. You should comunicate it to the other player. If the game has been created by other player, you can join with:
+```
+gambit -game=<id-of-game>
 ```
 
 You can press <kbd>ctrl+f</kbd> to flip the board to give a better perspective
