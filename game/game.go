@@ -3,6 +3,7 @@ package game
 import (
 	"fmt"
 	"gambit/netcon"
+	"log"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -26,7 +27,7 @@ const (
 // It tracks the board, legal moves, and the selected piece. It also keeps
 // track of the subset of legal moves for the currently selected piece
 type model struct {
-	match      string
+	game       string
 	userWhite  string
 	userBlack  string
 	board      *dt.Board
@@ -35,25 +36,54 @@ type model struct {
 	selected   string
 	buffer     string
 	flipped    bool
+	wait       bool // wait for the move of your opponent
+	cmoves     chan string
 }
 
 // InitialModel returns an initial model of the game board. It uses the
 // starting position of a normal chess game and generates the legal moves from
 // the starting position.
-func InitialModel(match string, white string, black string) tea.Model {
+func InitialModel(game string, white string, black string, start bool) tea.Model {
 	board := dt.ParseFen(dt.Startpos)
+
 	return model{
-		match:     match,
+		game:      game,
 		userWhite: white,
 		userBlack: black,
 		board:     &board,
 		moves:     board.GenerateLegalMoves(),
+		wait:      !start,
+		cmoves:    make(chan string),
 	}
 }
 
 // Init Initializes the model
 func (m model) Init() tea.Cmd {
-	return nil
+	return tea.Batch(listenForMove(m.cmoves), waitForMove(m.cmoves))
+}
+
+type moveReceived string
+
+func listenForMove(c chan string) tea.Cmd {
+	return func() tea.Msg {
+		for {
+			moveMsg, _ := netcon.ReciveMsg()
+			if moveMsg != nil {
+				fields := strings.Split(moveMsg.Args, ":")
+				if len(fields) == 2 {
+					log.Printf("Recibido movimiento: %s\n", fields[1])
+					c <- fields[1]
+				}
+			}
+		}
+	}
+}
+
+func waitForMove(c chan string) tea.Cmd {
+	return func() tea.Msg {
+		move := <-c
+		return moveReceived(move)
+	}
 }
 
 // View converts a FEN string into a human readable chess board. All pieces and
@@ -86,9 +116,14 @@ func (m model) Init() tea.Cmd {
 //
 func (m model) View() string {
 	var s strings.Builder
-	s.WriteString("Partida: " + m.match + "\n")
-	s.WriteString("Blancas: " + m.userWhite + "\n")
-	s.WriteString("Negras: " + m.userBlack + "\n\n")
+	s.WriteString(fmt.Sprintf("  Partida: %s\n", m.game))
+	s.WriteString(fmt.Sprintf("  Blancas: %s\n", m.userWhite))
+	s.WriteString(fmt.Sprintf("  Negras: %s\n", m.userBlack))
+	if m.wait {
+		s.WriteString("Esperando movimiento de tu oponente ...\n\n")
+	} else {
+		s.WriteString("Mueve\n\n")
+	}
 
 	s.WriteString(BorderTop())
 
@@ -156,10 +191,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c", "q":
 			return m, tea.Quit
+
 		case "ctrl+f":
 			m.flipped = !m.flipped
+
 		case "a", "b", "c", "d", "e", "f", "g", "h":
 			m.buffer = msg.String()
+
 		case "1", "2", "3", "4", "5", "6", "7", "8":
 			var move string
 			if m.buffer != "" {
@@ -167,14 +205,36 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.buffer = ""
 			}
 			return m.Select(move)
+
 		case "esc":
 			return m.Deselect()
 		}
+
+	case moveReceived:
+		if m.wait {
+			move, err := dt.ParseMove(fmt.Sprintf("%s", msg))
+			if err == nil {
+				m.board.Apply(move)
+				log.Println("Movimiento aplicado")
+				m.moves = m.board.GenerateLegalMoves()
+			} else {
+				log.Println("Error: Se intento aplicar un movimiento mal formado")
+			}
+		}
+		m.wait = false
+
+		return m, waitForMove(m.cmoves)
 	}
 
 	return m, nil
 }
 
+/*
+func ApplyOponentMove(movestr string) tea.Msg {
+	log.Println("retornamos moveReceived con " + movestr)
+	return moveReceived(movestr)
+}
+*/
 func (m model) Deselect() (tea.Model, tea.Cmd) {
 	m.selected = ""
 	m.pieceMoves = []dt.Move{}
@@ -182,6 +242,10 @@ func (m model) Deselect() (tea.Model, tea.Cmd) {
 }
 
 func (m model) Select(square string) (tea.Model, tea.Cmd) {
+	if m.wait {
+		return m, nil //it's not your turn!!
+	}
+
 	// If the user has already selected a piece, check see if the square that
 	// the user clicked on is a legal move for that piece. If so, make the move.
 	if m.selected != "" {
@@ -192,8 +256,9 @@ func (m model) Select(square string) (tea.Model, tea.Cmd) {
 			if move.String() == from+to {
 				m.board.Apply(move)
 
-				// send move to server
-				netcon.SendMove(move)
+				// send move to server and wait for the oponent move
+				netcon.SendMove(move, m.game)
+				m.wait = true
 
 				// We have applied a new move and the chess board is in a new state.
 				// We must generate the new legal moves for the new state.

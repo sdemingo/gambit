@@ -31,6 +31,8 @@ func main() {
 		username = *userflag
 	}
 
+	netcon.InitLog(username)
+
 	err := netcon.ConnectToServer(username)
 	if err != nil {
 		fmt.Println("Error: Server not found")
@@ -81,7 +83,7 @@ func main() {
 	*/
 
 	p := tea.NewProgram(
-		game.InitialModel(matchName, playerWhite, playerBlack),
+		game.InitialModel(matchName, playerWhite, playerBlack, (playerWhite == username)),
 		tea.WithAltScreen(),
 		tea.WithMouseCellMotion(),
 	)
