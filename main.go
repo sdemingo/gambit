@@ -63,7 +63,7 @@ func main() {
 
 		fmt.Printf("\n\nBienvenido %s. Has creado una partida en el servidor.\n\n", playerWhite)
 		fmt.Printf("Su identificador es: %s\n", matchName)
-		fmt.Println("Comunicáselo a tu oponente y espera a que se conecte .... ")
+		fmt.Println("Comunícaselo a tu oponente y espera a que se conecte .... \n")
 
 		playerBlack, err = netcon.ReceivePlayerName()
 		if err != nil {
