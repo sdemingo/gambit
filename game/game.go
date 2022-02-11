@@ -39,6 +39,7 @@ type model struct {
 	wait       bool // wait for the move of your opponent
 	cmoves     chan string
 	ascii      bool
+	endText    string
 }
 
 // InitialModel returns an initial model of the game board. It uses the
@@ -56,6 +57,7 @@ func InitialModel(game string, white string, black string, start bool, ascii boo
 		wait:      !start,
 		cmoves:    make(chan string),
 		ascii:     ascii,
+		endText:   "",
 	}
 }
 
@@ -80,7 +82,7 @@ func listenForMove(c chan string) tea.Cmd {
 
 			if err != nil {
 				log.Println("El servidor cerró la conexión")
-				c <- "FINAL:"
+				c <- "FINAL:El servidor cerró la conexión"
 			}
 			if moveMsg != nil && moveMsg.Cmd == netcon.END {
 				log.Println("Se recibió final de la partida")
@@ -126,7 +128,17 @@ func waitForMove(c chan string) tea.Cmd {
 //      A   B   C   D   E   F   G   H
 //
 func (m model) View() string {
+	
+	if m.endText!=""{
+		s:="\n\n\n\n"
+		s+="\tLA PARTIDA HA TERMINADO\n\n"
+		s+="\t"+m.endText+"\n\n"
+		s+=Help("\n\tPulsa ctrl+c o 'q' para salir\n")
+		return s
+	}
+	
 	var s strings.Builder
+	
 	s.WriteString(fmt.Sprintf("  Partida: %s\n", m.game))
 	s.WriteString(fmt.Sprintf("  Blancas: %s\n", m.userWhite))
 	s.WriteString(fmt.Sprintf("  Negras: %s\n", m.userBlack))
@@ -230,7 +242,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case moveReceived:
 		movestr := fmt.Sprintf("%s", msg)
 		if strings.HasPrefix(movestr, "FINAL:") {
-			return m, tea.Quit
+			m.endText=strings.TrimPrefix(movestr,"FINAL:")
+			return m, nil
 		}
 		if m.wait {
 			move, err := dt.ParseMove(movestr)
@@ -273,6 +286,12 @@ func (m model) Select(square string) (tea.Model, tea.Cmd) {
 		from := m.selected
 		to := square
 
+		if !m.wait && (len(m.pieceMoves)==0){
+			//Si es tu turno y no hay movimientos estás
+			//en mate.
+			//Enviamos mensaje de END para rendirnos
+		}
+		
 		for _, move := range m.pieceMoves {
 			if move.String() == from+to {
 				m.board.Apply(move)
