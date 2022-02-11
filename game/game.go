@@ -128,17 +128,17 @@ func waitForMove(c chan string) tea.Cmd {
 //      A   B   C   D   E   F   G   H
 //
 func (m model) View() string {
-	
-	if m.endText!=""{
-		s:="\n\n\n\n"
-		s+="\tLA PARTIDA HA TERMINADO\n\n"
-		s+="\t"+m.endText+"\n\n"
-		s+=Help("\n\tPulsa ctrl+c o 'q' para salir\n")
+
+	if m.endText != "" {
+		s := "\n\n\n\n"
+		s += "\tLA PARTIDA HA TERMINADO\n\n"
+		s += "\t" + m.endText + "\n\n"
+		s += Help("\n\tPulsa ctrl+c o 'q' para salir\n")
 		return s
 	}
-	
+
 	var s strings.Builder
-	
+
 	s.WriteString(fmt.Sprintf("  Partida: %s\n", m.game))
 	s.WriteString(fmt.Sprintf("  Blancas: %s\n", m.userWhite))
 	s.WriteString(fmt.Sprintf("  Negras: %s\n", m.userBlack))
@@ -169,10 +169,7 @@ func (m model) View() string {
 		for c, cell := range row {
 			display := Display[cell]
 			if m.ascii {
-				display = cell
-				if display == "" {
-					display = " "
-				}
+				display = DisplayASCII[cell]
 			}
 
 			// The user selected the current cell, highlight it so they know it is
@@ -242,7 +239,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case moveReceived:
 		movestr := fmt.Sprintf("%s", msg)
 		if strings.HasPrefix(movestr, "FINAL:") {
-			m.endText=strings.TrimPrefix(movestr,"FINAL:")
+			m.endText = strings.TrimPrefix(movestr, "FINAL:")
 			return m, nil
 		}
 		if m.wait {
@@ -286,12 +283,12 @@ func (m model) Select(square string) (tea.Model, tea.Cmd) {
 		from := m.selected
 		to := square
 
-		if !m.wait && (len(m.pieceMoves)==0){
+		if !m.wait && (len(m.pieceMoves) == 0) {
 			//Si es tu turno y no hay movimientos estás
 			//en mate.
 			//Enviamos mensaje de END para rendirnos
 		}
-		
+
 		for _, move := range m.pieceMoves {
 			if move.String() == from+to {
 				m.board.Apply(move)

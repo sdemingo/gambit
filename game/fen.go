@@ -23,6 +23,22 @@ var Display = map[string]string{
 	"r": "♜",
 }
 
+var DisplayASCII = map[string]string{
+	"":  " ",
+	"B": "A",
+	"K": "R",
+	"N": "C",
+	"P": "P",
+	"Q": "D",
+	"R": "T",
+	"b": "a",
+	"k": "r",
+	"n": "c",
+	"p": "p",
+	"q": "d",
+	"r": "t",
+}
+
 // Tokens returns the (6) tokens of a FEN string
 //
 // [Pieces, Turn, Castling, En passant, Halfmove Clock, Fullmove number]
