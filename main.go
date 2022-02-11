@@ -15,10 +15,17 @@ import (
 
 func main() {
 
-	userflag := flag.String("user", "sdemingo", "user name in the game")
+	ascciflag := flag.Bool("a", false, "No usar símbolos Unicode para las piezas")
+	helpflag := flag.Bool("h", false, "Mostrar este mensaje de ayuda")
+	userflag := flag.String("user", "", "user name in the game")
 	gameflag := flag.String("game", "", "id of the game")
 
 	flag.Parse()
+
+	if *helpflag {
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
 
 	username := ""
 	if *userflag == "" {
@@ -83,7 +90,7 @@ func main() {
 	*/
 
 	p := tea.NewProgram(
-		game.InitialModel(matchName, playerWhite, playerBlack, (playerWhite == username)),
+		game.InitialModel(matchName, playerWhite, playerBlack, (playerWhite == username), *ascciflag),
 		tea.WithAltScreen(),
 		tea.WithMouseCellMotion(),
 	)

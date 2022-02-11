@@ -38,12 +38,13 @@ type model struct {
 	flipped    bool
 	wait       bool // wait for the move of your opponent
 	cmoves     chan string
+	ascii      bool
 }
 
 // InitialModel returns an initial model of the game board. It uses the
 // starting position of a normal chess game and generates the legal moves from
 // the starting position.
-func InitialModel(game string, white string, black string, start bool) tea.Model {
+func InitialModel(game string, white string, black string, start bool, ascii bool) tea.Model {
 	board := dt.ParseFen(dt.Startpos)
 
 	return model{
@@ -54,6 +55,7 @@ func InitialModel(game string, white string, black string, start bool) tea.Model
 		moves:     board.GenerateLegalMoves(),
 		wait:      !start,
 		cmoves:    make(chan string),
+		ascii:     ascii,
 	}
 }
 
@@ -154,6 +156,12 @@ func (m model) View() string {
 
 		for c, cell := range row {
 			display := Display[cell]
+			if m.ascii {
+				display = cell
+				if display == "" {
+					display = " "
+				}
+			}
 
 			// The user selected the current cell, highlight it so they know it is
 			// selected.
