@@ -1,8 +1,6 @@
 # Gambit
 
-Chess board in your terminal. All this work are inspired and based in the original [gambit](https://github.com/maaslalani/gambit) from [Maas Lalani](https://github.com/maaslalani). 
-
-I'm take it and build [gambitsrv](https://github.com/sdemingo/gambitsrv). A simple server in Go to manage games between human players.
+A client to play chess in your terminal. All this work are inspired and based in the original [gambit](https://github.com/maaslalani/gambit) from [Maas Lalani](https://github.com/maaslalani). I get it and build [gambitsrv](https://github.com/sdemingo/gambitsrv),  a simple server in Go to manage games between human players.
 
 <br/>
 <p align="center">
