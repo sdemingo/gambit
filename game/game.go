@@ -76,8 +76,8 @@ func listenForMove(c chan string) tea.Cmd {
 				}
 			}
 
-			if moveMsg != nil && moveMsg.Cmd == netcon.END{
-				c <- "FINAL:"+moveMsg.Args //recibido final de partida
+			if moveMsg != nil && moveMsg.Cmd == netcon.END {
+				c <- "FINAL:" + moveMsg.Args //recibido final de partida
 			}
 		}
 	}
@@ -215,8 +215,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case moveReceived:
-		movestr:=fmt.Sprintf("%s",msg)
-		if strings.HasPrefix("FINAL:",movestr){
+		movestr := fmt.Sprintf("%s", msg)
+		if strings.HasPrefix("FINAL:", movestr) {
 			return m, tea.Quit
 		}
 		if m.wait {

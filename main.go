@@ -48,9 +48,9 @@ func main() {
 			Create a new game and play with whites
 		*/
 		playerWhite = username
-		matchName = netcon.CreateMatch()
-		if matchName == "" {
-			fmt.Println("Error: No se puede crear una nueva partida en el servidor")
+		matchName, err = netcon.CreateMatch()
+		if err != nil {
+			fmt.Println(err)
 			os.Exit(1)
 		}
 
@@ -58,9 +58,9 @@ func main() {
 		fmt.Printf("Su identificador es: %s\n", matchName)
 		fmt.Println("Comunicáselo a tu oponente y espera a que se conecte .... ")
 
-		playerBlack = netcon.ReceivePlayerName()
-		if playerBlack == "" {
-			fmt.Println("Error: Al recibir el nombre del oponente")
+		playerBlack, err = netcon.ReceivePlayerName()
+		if err != nil {
+			fmt.Println(err)
 			os.Exit(1)
 		}
 
@@ -70,9 +70,9 @@ func main() {
 		*/
 		playerBlack = username
 		matchName = *gameflag
-		playerWhite = netcon.JoinMatch(matchName)
-		if playerWhite == "" {
-			fmt.Println("Error: Al recibir el nombre del oponente")
+		playerWhite, err = netcon.JoinMatch(matchName)
+		if err != nil {
+			fmt.Println(err)
 			os.Exit(1)
 		}
 	}

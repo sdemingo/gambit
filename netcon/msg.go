@@ -7,10 +7,12 @@ import (
 )
 
 const (
+	ERROR  = "error"
+	OK     = "ok"
 	CREATE = "create"
 	JOIN   = "join"
 	MOVE   = "move"
-	END = "end"
+	END    = "end"
 )
 
 type Msg struct {

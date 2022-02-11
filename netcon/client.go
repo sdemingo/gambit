@@ -1,12 +1,11 @@
 package netcon
 
 import (
-	"bufio"
 	"encoding/json"
+	"errors"
 	"log"
 	"net"
 	"os"
-	"strings"
 
 	dt "github.com/dylhunn/dragontoothmg"
 )
@@ -37,26 +36,37 @@ func ConnectToServer(username string) (err error) {
 }
 
 // Join to a created match and receive the white player name
-func JoinMatch(game string) string {
+func JoinMatch(game string) (string, error) {
 	msg := NewMsg(JOIN, user)
 	msg.Args = game
 	b, _ := json.Marshal(msg)
 	conn.Write(b)
 
-	resp := bufio.NewReader(conn)
-	message, _ := resp.ReadString('\n')
-	return strings.Trim(message, "\n")
+	resp, err := UnpackMsg(conn)
+	if err != nil {
+		return "", err
+	}
+	if resp.Cmd == ERROR {
+		return "", errors.New(resp.Args)
+	}
+	return resp.Args, nil
 }
 
 // Create a new match
-func CreateMatch() string {
+func CreateMatch() (string, error) {
 	msg := NewMsg(CREATE, user)
 	b, _ := json.Marshal(msg)
 	conn.Write(b)
 
-	resp := bufio.NewReader(conn)
-	message, _ := resp.ReadString('\n')
-	return strings.Trim(message, "\n")
+	resp, err := UnpackMsg(conn)
+	if err != nil {
+		return "", err
+	}
+	if resp.Cmd == ERROR {
+		return "", errors.New(resp.Args)
+	}
+
+	return resp.Args, nil
 }
 
 // Send a move to the server
@@ -68,10 +78,16 @@ func SendMove(move dt.Move, game string) {
 }
 
 // Receive the player black player name
-func ReceivePlayerName() string {
-	resp := bufio.NewReader(conn)
-	message, _ := resp.ReadString('\n')
-	return strings.Trim(message, "\n")
+func ReceivePlayerName() (string, error) {
+	resp, err := UnpackMsg(conn)
+	if err != nil {
+		return "", err
+	}
+	if resp.Cmd == ERROR {
+		return "", errors.New(resp.Args)
+	}
+
+	return resp.Args, nil
 }
 
 // Receive a message from the server
