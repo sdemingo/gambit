@@ -17,8 +17,8 @@ func main() {
 
 	ascciflag := flag.Bool("a", false, "No usar símbolos Unicode para las piezas")
 	helpflag := flag.Bool("h", false, "Mostrar este mensaje de ayuda")
-	userflag := flag.String("user", "", "user name in the game")
-	gameflag := flag.String("game", "", "id of the game")
+	userflag := flag.String("u", "", "Nombre de usuario en la partida")
+	gameflag := flag.String("g", "", "Identificador de la partida. Es necesario para unirse a una")
 
 	flag.Parse()
 
