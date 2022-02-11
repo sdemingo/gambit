@@ -67,7 +67,7 @@ type moveReceived string
 func listenForMove(c chan string) tea.Cmd {
 	return func() tea.Msg {
 		for {
-			moveMsg, _ := netcon.ReciveMsg()
+			moveMsg, err := netcon.ReciveMsg()
 			if moveMsg != nil && moveMsg.Cmd == netcon.MOVE {
 				fields := strings.Split(moveMsg.Args, ":")
 				if len(fields) == 2 {
@@ -76,8 +76,13 @@ func listenForMove(c chan string) tea.Cmd {
 				}
 			}
 
+			if err != nil {
+				log.Println("El servidor cerró la conexión")
+				c <- "FINAL:"
+			}
 			if moveMsg != nil && moveMsg.Cmd == netcon.END {
-				c <- "FINAL:" + moveMsg.Args //recibido final de partida
+				log.Println("Se recibió final de la partida")
+				c <- "FINAL:" + moveMsg.Args
 			}
 		}
 	}
@@ -216,7 +221,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case moveReceived:
 		movestr := fmt.Sprintf("%s", msg)
-		if strings.HasPrefix("FINAL:", movestr) {
+		if strings.HasPrefix(movestr, "FINAL:") {
 			return m, tea.Quit
 		}
 		if m.wait {
