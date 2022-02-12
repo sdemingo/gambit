@@ -246,8 +246,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			move, err := dt.ParseMove(movestr)
 			if err == nil {
 				m.board.Apply(move)
-				log.Println("Movimiento aplicado")
 				m.moves = m.board.GenerateLegalMoves()
+
+				if m.IsCheckmate() {
+					netcon.SendCheckmate()
+					m.endText = "Has perdido la partida"
+					return m, nil
+				}
 			} else {
 				log.Println("Error: Se intento aplicar un movimiento mal formado")
 			}
@@ -260,12 +265,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-/*
-func ApplyOponentMove(movestr string) tea.Msg {
-	log.Println("retornamos moveReceived con " + movestr)
-	return moveReceived(movestr)
+func (m model) IsCheckmate() bool {
+	return (len(m.moves) == 0) && m.board.OurKingInCheck()
 }
-*/
+
 func (m model) Deselect() (tea.Model, tea.Cmd) {
 	m.selected = ""
 	m.pieceMoves = []dt.Move{}
@@ -282,12 +285,6 @@ func (m model) Select(square string) (tea.Model, tea.Cmd) {
 	if m.selected != "" {
 		from := m.selected
 		to := square
-
-		if !m.wait && (len(m.pieceMoves) == 0) {
-			//Si es tu turno y no hay movimientos estás
-			//en mate.
-			//Enviamos mensaje de END para rendirnos
-		}
 
 		for _, move := range m.pieceMoves {
 			if move.String() == from+to {

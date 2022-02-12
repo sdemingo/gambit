@@ -37,8 +37,7 @@ func ConnectToServer(username string) (err error) {
 
 // Join to a created match and receive the white player name
 func JoinMatch(game string) (string, error) {
-	msg := NewMsg(JOIN, user)
-	msg.Args = game
+	msg := NewMsg(JOIN, user, game)
 	b, _ := json.Marshal(msg)
 	conn.Write(b)
 
@@ -54,7 +53,7 @@ func JoinMatch(game string) (string, error) {
 
 // Create a new match
 func CreateMatch() (string, error) {
-	msg := NewMsg(CREATE, user)
+	msg := NewMsg(CREATE, user, "")
 	b, _ := json.Marshal(msg)
 	conn.Write(b)
 
@@ -71,8 +70,15 @@ func CreateMatch() (string, error) {
 
 // Send a move to the server
 func SendMove(move dt.Move, game string) {
-	msg := NewMsg(MOVE, user)
-	msg.Args = game + ":" + move.String()
+	payload := game + ":" + move.String()
+	msg := NewMsg(MOVE, user, payload)
+	b, _ := json.Marshal(msg)
+	conn.Write(b)
+}
+
+// Send checkmate confirmation
+func SendCheckmate() {
+	msg := NewMsg(END, user, "")
 	b, _ := json.Marshal(msg)
 	conn.Write(b)
 }
