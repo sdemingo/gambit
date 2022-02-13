@@ -1,6 +1,6 @@
 # Gambit
 
-A client to play chess in your terminal. All this work are inspired and based in the original [gambit](https://github.com/maaslalani/gambit) from [Maas Lalani](https://github.com/maaslalani). I get it and build [gambitsrv](https://github.com/sdemingo/gambitsrv),  a simple server in Go to manage games between human players.
+A client to play chess in your terminal. All this work are inspired and based in the original [gambit](https://github.com/maaslalani/gambit) from [Maas Lalani](https://github.com/maaslalani). I get it and build [gambitsrv](https://github.com/sdemingo/gambitsrv),  a simple server in Go to manage chess games between human players. Gambit is specially designed to work on a unix shared server (*aka tilde or similar*)
 
 <br/>
 <p align="center">
@@ -26,7 +26,7 @@ gambit
 
 Then, you get the game id from the server. You should comunicate it to the other player. If the game has been created by other player, you can join with:
 ```
-gambit -game=<id-of-game>
+gambit -g <id-of-game>
 ```
 
 You can press <kbd>ctrl+f</kbd> to flip the board to give a better perspective

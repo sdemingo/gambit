@@ -23,6 +23,7 @@ var Display = map[string]string{
 	"r": "♜",
 }
 
+// Display maps pieces from their FEN representations with spanish characters
 var DisplayASCII = map[string]string{
 	"":  " ",
 	"B": "A",
