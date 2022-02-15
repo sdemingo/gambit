@@ -9,14 +9,14 @@ A client to play chess in your terminal. All this work are inspired and based in
 <br/>
 
 
-### Move
+## Move
 
 There are two ways to move in `gambit`:
 
 * Type out the square the piece you want to move is on, then type out the square to which you want to move the piece.
 * With the mouse, click on the target piece and target square.
 
-### Play
+## Play
 
 You can create a new a game by running:
 
@@ -32,3 +32,8 @@ gambit -g <id-of-game>
 You can press <kbd>ctrl+f</kbd> to flip the board to give a better perspective
 for the second player.
 
+## Other options
+
+* `-u`: Use a name in the game. By default gambit use your login name
+* `-p`: Use a different port to connect to gambitsrv. By default it uses 22022
+* `-h`: Show the help

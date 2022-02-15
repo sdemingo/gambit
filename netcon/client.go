@@ -29,8 +29,8 @@ func InitLog(user string) {
 	log.SetOutput(logFile)
 }
 
-func ConnectToServer(username string) (err error) {
-	conn, err = net.Dial("tcp", SERVER+":"+PORT)
+func ConnectToServer(username string, port string) (err error) {
+	conn, err = net.Dial("tcp", SERVER+":"+port)
 	user = username
 	return err
 }

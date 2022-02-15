@@ -19,6 +19,7 @@ func main() {
 	helpflag := flag.Bool("h", false, "Mostrar este mensaje de ayuda")
 	userflag := flag.String("u", "", "Nombre de usuario en la partida")
 	gameflag := flag.String("g", "", "Identificador de la partida. Es necesario para unirse a una")
+	portflag := flag.String("p", "22022", "Puerto donde se encuentra escuchando gambitsrv")
 
 	flag.Parse()
 
@@ -40,7 +41,7 @@ func main() {
 
 	netcon.InitLog(username)
 
-	err := netcon.ConnectToServer(username)
+	err := netcon.ConnectToServer(username,*portflag)
 	if err != nil {
 		fmt.Println("Error: Server not found")
 		os.Exit(1)
